@@ -2,8 +2,6 @@
 #include <iostream>
 #include <random>
 #include <cstdlib>
-#include <ctime>
-clock_t lastInputTime = 0;
 using namespace std;
 // Randomizer
 random_device rd;
@@ -124,6 +122,15 @@ vector<entity> snake;
 entity food(randGen(300, 10), randGen(300, 10));
 bool gameOver = false;
 Color snakeHead = {1, 1, 1, 1}, snakeBody = {0.9, 0.9, 0.9, 1}, foodColor = {0.15, 0.15, 0.15, 1};
+enum directions
+{
+    STOP,
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN, 
+};
+directions inputDirection;
 void DrawBody(vector<entity> snake, int start, Color color)
 {
     int offset[4];
@@ -201,35 +208,50 @@ void display()
 }
 void keyboard(int key, int, int)
 {
-    clock_t currentTime = clock();
-    if ((currentTime - lastInputTime) < 100)
-        return;
-    else
+    switch (key)
     {
-        switch (key)
+    case GLUT_KEY_UP:
+        inputDirection = UP;
+        break;
+    case GLUT_KEY_DOWN:
+        inputDirection = DOWN;
+        break;
+    case GLUT_KEY_LEFT:
+        inputDirection = LEFT;
+        break;
+    case GLUT_KEY_RIGHT:
+        inputDirection = RIGHT;
+        break;
+    }
+}
+void gameLoop(int blocksize)
+{
+    if (!gameOver)
+    {
+        switch (inputDirection)
         {
-        case GLUT_KEY_UP:
+        case UP:
             if (snake[0].directionY == 0)
             {
                 snake[0].directionY = 1;
                 snake[0].directionX = 0;
             }
             break;
-        case GLUT_KEY_DOWN:
+        case DOWN:
             if (snake[0].directionY == 0)
             {
                 snake[0].directionX = 0;
                 snake[0].directionY = -1;
             }
             break;
-        case GLUT_KEY_LEFT:
+        case LEFT:
             if (snake[0].directionX == 0)
             {
                 snake[0].directionY = 0;
                 snake[0].directionX = -1;
             }
             break;
-        case GLUT_KEY_RIGHT:
+        case RIGHT:
             if (snake[0].directionX == 0)
             {
                 snake[0].directionY = 0;
@@ -237,13 +259,6 @@ void keyboard(int key, int, int)
             }
             break;
         }
-        lastInputTime = currentTime;
-    }
-}
-void gameLoop(int blocksize)
-{
-    if (!gameOver)
-    {
         for (int i = snake.size() - 1; i > 0; i--)
             snake[i] = snake[i - 1];
         snake[0].update(blocksize);
